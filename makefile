@@ -1,5 +1,5 @@
 BIN=lelisp
-SRC=main.cc
+SRC=main.cc common.cc parser.cc eval.cc
 LIB=
 CC=g++
 CC_FLAG=-std=c++11 -g
