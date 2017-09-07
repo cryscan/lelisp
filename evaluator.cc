@@ -1,8 +1,13 @@
 #include <string>
 #include <map>
 #include <unordered_set>
+#include <algorithm>
 #include <assert.h>
 #include "common.h"
+
+using namespace std;
+
+vector<env*> envs;
 
 func_dict expr_func_dict =
 {
@@ -38,10 +43,19 @@ bool is_val_func(void* ptr)
 
 void* eval_val(env* e, atom a)
 {
-    env::const_iterator it = e->find(a);
-    if (it != e->cend())
-	return it->second;
-    return 0;
+    env* env = e;
+    while (true)
+    {
+	env::const_iterator it = env->find(a);
+	if (it != env->cend())
+	    return it->second;
+	
+	auto iter = find(envs.cbegin(), envs.cend(), env);
+	if (iter == envs.cend())
+	    return 0;
+	if (iter != envs.cbegin())
+	    env = *(--iter);
+    }
 }
 
 list* eval_args(env* e, list* l)
@@ -75,22 +89,24 @@ void* eval_expr(env* e, list* l)
 	    atom head = atom(t->head);
 	    if (head == atom_lambda) // l : ((lambda (p1...pn) e) a1...an)
 	    {
-		env te = *e;
+		env *env = new map<atom, void*>(*e);
+		envs.push_back(env);
+		
 		list* tail = t->tail; // ((p1...pn) e)
 		list* params = (list*)(tail->head); // (p1...pn)
 		void* body = tail->tail->head;
-		list* args = eval_args(&te, l->tail); // (a1...an)
+		list* args = eval_args(e, l->tail); // (a1...an)
 		while (params) // bind p to a.
 		{
 		    assert(is_atom(params->head)); // param error.
 		    assert(args);
 		    
 		    atom p = atom(params->head);
-		    te[p] = args->head;
+		    (*env)[p] = args->head;
 		    params = params->tail;
 		    args = args->tail;
 		}
-		return eval(&te, body);
+		return eval(env, body);
 	    }
 	}
     }
@@ -105,6 +121,28 @@ void* eval(env* e, void* v)
     else
 	return eval_expr(e, (list*)v);
     return 0;
+}
+
+void collect(list* l, unordered_set<list*>& set)
+{
+    set.insert(l);
+    if (is_list(l->head))
+	collect((list*)(l->head), set);
+    if (l->tail)
+	collect(l->tail, set);
+}
+
+void clean(env* e)
+{
+    unordered_set<list*> set;
+    for (auto p : (*e))
+	if (is_list(p.second))
+	    collect((list*)(p.second), set);
+    reset_list_set(set);
+
+    for (auto p : envs)
+	delete p;
+    envs.clear();
 }
 
 void* prime_quote(env* e, list* l) // ('(...))

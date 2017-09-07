@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <map>
 #include <unordered_set>
 
@@ -17,6 +18,7 @@ typedef std::map<atom, void*> env;
 extern atom atom_true, atom_lambda, atom_quote;
 atom create_atom(const std::string&);
 list* cons(void*, list*);
+void reset_list_set(std::unordered_set<list*>&);
 
 bool is_atom(void*);
 bool is_list(void*);
@@ -38,6 +40,7 @@ typedef void* (*prime_func)(env*, list*);
 typedef std::map<prime_func, std::string> func_dict;
 
 void* eval(env*, void*);
+void clean(env*);
 void register_func(env*);
 
 void* prime_quote(env*, list*);

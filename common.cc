@@ -32,6 +32,9 @@ list* cons(void* head, list* tail)
     return l;
 }
 
+void reset_list_set(unordered_set<list*>& set)
+{ list_set = set; }
+
 bool is_atom(void* ptr)
 { return atom_set.find((atom)ptr) != atom_set.end(); }
 bool is_list(void* ptr)

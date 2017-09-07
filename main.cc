@@ -42,7 +42,7 @@ void print(void* v)
     }
 }
 
-void run(env* e)
+void run_command(env* e)
 {
     string line, next;
     while (true)
@@ -53,13 +53,14 @@ void run(env* e)
 	{
 	    cout << "  ";
 	    getline(cin, next);
-	    line = line + " " + next;
+	    line = line + "\n" + next;
 	}
 	parcel r = parse(line.cbegin());
 	if (r.content == 0)
 	    continue;
 	print(eval(e, (list*)r.content));
 	cout << endl;
+	clean(e);
     }
 }
 
@@ -71,7 +72,7 @@ int main(int argc, char** argv)
     atom_quote = create_atom("quote");
     
     register_func(e);
-    run(e);
+    run_command(e);
   
     return 0;
 }
