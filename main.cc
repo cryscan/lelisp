@@ -66,7 +66,8 @@ void run_command(env* e)
 
 int main(int argc, char** argv)
 {
-    env* e = new env;
+    env* e = cons(0);
+    
     atom_true = create_atom("t");
     atom_lambda = create_atom("lambda");
     atom_quote = create_atom("quote");

@@ -32,7 +32,7 @@ list* cons(void* head, list* tail)
     return l;
 }
 
-void reset_list_set(unordered_set<list*>& set)
+void list_coll(unordered_set<list*>& set)
 { list_set = set; }
 
 bool is_atom(void* ptr)

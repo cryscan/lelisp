@@ -7,8 +7,6 @@
 
 using namespace std;
 
-vector<env*> envs;
-
 func_dict expr_func_dict =
 {
     {prime_quote, "quote"},
@@ -27,6 +25,18 @@ func_dict val_func_dict =
     {prime_list, "list"},
 };
 
+env* last_env;
+env* cons(env* e)
+{
+    env* ret = new env();
+    if (e != 0)
+	ret->e = e->e;
+    ret->prev = e;
+    
+    last_env = ret;
+    return ret;
+}
+
 void register_func(env* e)
 {
     for (auto p : expr_func_dict)
@@ -40,22 +50,16 @@ bool is_expr_func(void* ptr)
 bool is_val_func(void* ptr)
 { return val_func_dict.find((prime_func)ptr) != val_func_dict.end(); }
 
-
 void* eval_val(env* e, atom a)
 {
-    env* env = e;
-    while (true)
-    {
-	env::const_iterator it = env->find(a);
-	if (it != env->cend())
-	    return it->second;
-	
-	auto iter = find(envs.cbegin(), envs.cend(), env);
-	if (iter == envs.cend())
-	    return 0;
-	if (iter != envs.cbegin())
-	    env = *(--iter);
-    }
+    if (e == 0)
+	return 0;
+    
+    auto it = e->find(a);
+    if (it != e->cend())
+	return it->second;
+
+    eval_val(e->prev, a);
 }
 
 list* eval_args(env* e, list* l)
@@ -89,8 +93,7 @@ void* eval_expr(env* e, list* l)
 	    atom head = atom(t->head);
 	    if (head == atom_lambda) // l : ((lambda (p1...pn) e) a1...an)
 	    {
-		env *env = new map<atom, void*>(*e);
-		envs.push_back(env);
+		env *env = cons(last_env);
 		
 		list* tail = t->tail; // ((p1...pn) e)
 		list* params = (list*)(tail->head); // (p1...pn)
@@ -138,11 +141,14 @@ void clean(env* e)
     for (auto p : (*e))
 	if (is_list(p.second))
 	    collect((list*)(p.second), set);
-    reset_list_set(set);
+    list_coll(set);
 
-    for (auto p : envs)
-	delete p;
-    envs.clear();
+    while (last_env != e)
+    {
+	env* env = last_env;
+	last_env = last_env->prev;
+	delete env;
+    }
 }
 
 void* prime_quote(env* e, list* l) // ('(...))

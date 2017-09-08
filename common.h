@@ -13,12 +13,10 @@ struct list
     list* tail;
 };
 
-typedef std::map<atom, void*> env;
-
 extern atom atom_true, atom_lambda, atom_quote;
 atom create_atom(const std::string&);
 list* cons(void*, list*);
-void reset_list_set(std::unordered_set<list*>&);
+void list_coll(std::unordered_set<list*>&);
 
 bool is_atom(void*);
 bool is_list(void*);
@@ -36,12 +34,28 @@ parcel(std::string::const_iterator it, void* v)
 parcel parse(std::string::const_iterator);
 
 /* evaluate */
+struct env
+{
+    std::map<atom, void*> e;
+    env* prev;
+
+    std::map<atom, void*>::iterator begin() { return e.begin();}
+    std::map<atom, void*>::iterator end() { return e.end(); }
+    
+    std::map<atom, void*>::const_iterator cbegin() { return e.cbegin();}
+    std::map<atom, void*>::const_iterator cend() { return e.cend(); }
+
+    std::map<atom, void*>::const_iterator find(atom a) { return e.find(a); }
+    void* &operator[](atom a) { return e[a]; }
+};
+
 typedef void* (*prime_func)(env*, list*);
 typedef std::map<prime_func, std::string> func_dict;
 
+env* cons(env*);
+void register_func(env*);
 void* eval(env*, void*);
 void clean(env*);
-void register_func(env*);
 
 void* prime_quote(env*, list*);
 void* prime_lambda(env*, list*);
