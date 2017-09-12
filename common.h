@@ -38,15 +38,14 @@ struct env
 {
     std::map<atom, void*> e;
     env* prev;
-
-    std::map<atom, void*>::iterator begin() { return e.begin();}
-    std::map<atom, void*>::iterator end() { return e.end(); }
     
-    std::map<atom, void*>::const_iterator cbegin() { return e.cbegin();}
-    std::map<atom, void*>::const_iterator cend() { return e.cend(); }
-
-    std::map<atom, void*>::const_iterator find(atom a) { return e.find(a); }
-    void* &operator[](atom a) { return e[a]; }
+    void* &operator [](atom a) { return e[a]; }
+    
+    auto begin() { return e.begin();}
+    auto end() { return e.end(); }
+    auto cbegin() { return e.cbegin();}
+    auto cend() { return e.cend(); }
+    auto find(atom a) { return e.find(a); }
 };
 
 typedef void* (*prime_func)(env*, list*);
@@ -57,17 +56,6 @@ void register_func(env*);
 void* eval(env*, void*);
 void clean(env*);
 
-void* prime_quote(env*, list*);
-void* prime_lambda(env*, list*);
-void* prime_label(env*, list*);
-void* prime_cond(env*, list*);
-void* prime_defun(env*, list*);
-
-void* prime_head(env*, list*);
-void* prime_tail(env*, list*);
-void* prime_cons(env*, list*);
-void* prime_atom(env*, list*);
-void* prime_eq(env*, list*);
-void* prime_list(env*, list*);
-
-/* running */
+/* interface */
+void set_mode(int);
+void execute(env*, std::istream&);

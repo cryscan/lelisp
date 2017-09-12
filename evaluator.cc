@@ -7,6 +7,19 @@
 
 using namespace std;
 
+void* prime_quote(env*, list*);
+void* prime_lambda(env*, list*);
+void* prime_label(env*, list*);
+void* prime_cond(env*, list*);
+void* prime_defun(env*, list*);
+
+void* prime_head(env*, list*);
+void* prime_tail(env*, list*);
+void* prime_cons(env*, list*);
+void* prime_atom(env*, list*);
+void* prime_eq(env*, list*);
+void* prime_list(env*, list*);
+
 func_dict expr_func_dict =
 {
     {prime_quote, "quote"},
