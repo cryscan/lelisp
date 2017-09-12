@@ -1,12 +1,12 @@
 #include <iostream>
 #include <string>
-#include <stack>
+#include <vector>
 #include "common.h"
 
 using namespace std;
 
 typedef void (*callback)(void);
-stack<int> paren_stack;
+vector<int> paren_stack;
 
 bool paren_matched(const string& str)
 {
@@ -14,9 +14,9 @@ bool paren_matched(const string& str)
     {
 	const char ch = str[i];
 	if (ch == '(')
-	    paren_stack.push(i);
+	    paren_stack.push_back(i);
 	if (ch == ')')
-	    paren_stack.pop();
+	    paren_stack.pop_back();
     }
     return paren_stack.empty();
 }
@@ -42,7 +42,6 @@ void print(void* expr)
 
 void execute(env* e, istream& s)
 {
-    bool done = false;
     string line, statement;
 
     cout << "> ";
@@ -54,11 +53,11 @@ void execute(env* e, istream& s)
 	    parcel r = parse(statement.cbegin());
 	    print(eval(e, (list*)r.content));
 	    cout << endl;
+	    
 	    clean(e);
 	    return;
 	}
 	else
-	    for (int i = 0; i <= 2 + paren_stack.top(); ++i)
-		cout << " ";
+	    cout << "  ";
     }
 }
